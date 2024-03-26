@@ -1,0 +1,77 @@
+                                                         Core requirement:-
+
+1. Stored function:-Create stored function that can applied to a query in your DB
+
+DELIMITER // 
+CREATE FUNCTION customer_alevel(current_balance DECIMAL(10,2)) 
+RETURNS VARCHAR(20)
+DETERMINISTIC
+BEGIN   
+DECLARE customer_alevel VARCHAR(20);   
+IF current_balance > 5000 THEN	SET customer_alevel = 'PLATINUM'; 
+ELSEIF (current_balance >= 1000 AND current_balance <= 5000) THEN SET customer_alevel = 'GOLD';  
+ELSEIF current_balance < 1000 THEN SET customer_alevel = 'SILVER';   
+ END IF;
+ RETURN (customer_alevel);
+ END // 
+DELIMITER ;
+select custid,a_number,atype,customer_alevel(current_balance) from account;
+
+2. Create an example query with a subquery to demonstrate how to extract data from your DB for analysis:-
+
+select investment_type,rm_name
+from other_investment
+where rm_name IN (select rm_name
+                 from relationship_manager
+		 where B_city = 'London');
+
+                                                   Advanced option:-
+
+1. Create a stored procedure and demonstrate how it run:-
+
+show databases;
+use abc_bank_ltd;
+select * from loan;
+DELIMITER // 
+CREATE PROCEDURE Check_Loan_status(IN status VARCHAR(20))
+BEGIN 
+SELECT L_accno,custid,loan_type
+FROM loan
+WHERE Loan_status = status;
+END // 
+DELIMITER ;
+
+CALL Check_loan_status('Default');
+
+2. create a view that uses three tables:- customer, Loan and loan payment,prepare and demonstrate a query that uses the view to produce a logically arranged result set for analysis.
+
+
+use abc_bank_ltd;
+
+create view loan_details
+AS
+SELECT first_name,last_name,l.L_accno,l.loan_type,lp.p_amount,lp.loan_outstanding
+FROM customer c
+INNER JOIN loan l on c.custid = l.custid
+INNER JOIN loan_payment lp on c.custid = lp.custid;
+
+
+SELECT * FROM loan_details
+WHERE
+ loan_type = 'Business loan';
+
+3. Prepare an example query with groupby and having to demonstrate how to extract data from your DB for analysis.
+ 
+
+
+use abc_bank_ltd;
+
+select sum(p_amount) as payment_inMarch,loan_status,sum(loan_outstanding) AS Total_outstanding
+from loan_payment
+where L_accno IN(Select L_accno
+                 FROM Loan
+		 Group by loan_status)
+group by loan_status;
+
+                                                              END
+
